@@ -28,10 +28,13 @@ def launch(backend:Literal["TouchDesigner", "TouchPlayer"]):
         raise Exception(f"TD-Installation for veruon {tdVersion} not found!")
 
 def designer():
+    
     launch("TouchDesigner")
 
 def editor():
+    environ["NODE_ENV"] = "production"
     launch("TouchDesigner")
 
 def player():
+    environ["NODE_ENV"] = "production"
     launch("TouchPlayer")
