@@ -1,5 +1,5 @@
 [project]
-name = "py-td-launch"
+name = "touchlaunch"
 version = "0.0.1"
 description = "An automated launcher for TouchDesigner Projects."
 readme = "README.md"
