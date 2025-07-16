@@ -18,3 +18,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/touchlaunch"]
+
+[project.scripts]
+designer = "touchlaunch:designer"
+edit = "touchlaunch:designer"
+player = "touchlaunch:player"
