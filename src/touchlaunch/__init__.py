@@ -124,18 +124,21 @@ def read_packagefolder_file():
     import os, re
     def replace_var(match):
         var_name = match.group(1)
-        try:
-            return os.environ[var_name] 
-        except KeyError:
-            return ""
+        
+        return os.environ[var_name] 
+        
     result = []
     with open(".packagefolder", "a+t") as package_folder_file:
+        package_folder_file.seek(0)
         for _line in reversed( package_folder_file.readlines() ):
             line = _line.strip()
             if line.startswith("#"): continue # skip comments
-            enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
+            try:
+                enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
+            except KeyError:
+                continue
             if not enved_line: continue 
-            result.append(0)
+            result.append(enved_line)
     return result
 
 import json
@@ -152,6 +155,7 @@ def setup_vs_code_config(install_folder:str):
         current_config["python.defaultInterpreterPath"] = str( Path( install_folder, "bin", "python.exe")) # Note that we are being windows exclusive here...
         current_extra_paths = current_config.setdefault("python.analysis.extraPaths", []) 
         for extra_path in read_packagefolder_file():
+            
             if extra_path in current_extra_paths: continue
             current_extra_paths.insert(0, extra_path)
         current_config["python.analysis.extraPaths"] = current_extra_paths
