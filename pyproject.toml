@@ -1,6 +1,6 @@
 [project]
 name = "touchlaunch"
-version = "0.0.3"
+version = "0.1.0"
 description = "An automated launcher for TouchDesigner Projects."
 readme = "README.md"
 license="MIT"
@@ -26,3 +26,4 @@ packages = ["src/touchlaunch"]
 designer = "touchlaunch:designer"
 edit = "touchlaunch:designer"
 player = "touchlaunch:player"
+setup_code = "touchlaunch:setup_code"

@@ -1,5 +1,6 @@
-from typing import Literal
+from typing import Literal, Union
 from enum import Enum
+from functools import cache
 
 import subprocess
 from os import environ, listdir
@@ -13,9 +14,6 @@ import logging
 logger = logging.getLogger()
 log_level = getattr(logging, environ.get("TOUCHLAUNCH_LOGLEVEL", "INFO"), None) or logging.INFO
 logging.basicConfig(level=log_level)
-
-
-
 
 class SearchMode(Enum):
     STRICT          = "strict"
@@ -94,13 +92,19 @@ def search_touchdesigner_folder(mode:SearchMode) -> Path:
     logger.error(f"Could not find a fitting installation to satisify {td_version} in {mode} mode.")
     raise Exception(f"Could not find a fitting installation to satisify {td_version} in {mode} mode.")
 
-def launch(backend:Literal["TouchDesigner", "TouchPlayer"]):
+@cache
+def load_project_config():
     with Path("pyproject.toml").open("rb") as project_file:
-        projectData = loadToml( project_file )
+        return loadToml( project_file )
 
+def get_tool_config( project_data:Union[dict, None] = None):
+    _project_data = project_data or load_project_config()
+    return _project_data.get("tool", {}).get("touchdesigner", {})
 
+def launch(backend:Literal["TouchDesigner", "TouchPlayer"]):
+    project_data        = load_project_config()
     executeableName     = f"{backend}.exe" # Sorry mac lol.
-    tool_config         = projectData.get("tool", {}).get("touchdesigner", {})
+    tool_config         = get_tool_config( project_data= project_data )
     project_file        = tool_config.get("projectfile", "Project.toe")
     search_mode         = tool_config.get("enforce-version", "latest-build")
     tdFolder            = search_touchdesigner_folder(search_mode)
@@ -114,7 +118,45 @@ def launch(backend:Literal["TouchDesigner", "TouchPlayer"]):
     logger.info(f"Executing {tdExecuteable} with {project_file}")
     tdProcess = subprocess.Popen([str(tdExecuteable),  project_file])
     logger.info(f"Process Terminated. Exiting. ReturnCode { tdProcess.wait() }")
-   
+
+
+def read_packagefolder_file():
+    import os, re
+    def replace_var(match):
+        var_name = match.group(1)
+        try:
+            return os.environ[var_name] 
+        except KeyError:
+            return ""
+    result = []
+    with open(".packagefolder", "a+t") as package_folder_file:
+        for _line in reversed( package_folder_file.readlines() ):
+            line = _line.strip()
+            if line.startswith("#"): continue # skip comments
+            enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
+            if not enved_line: continue 
+            result.append(0)
+    return result
+
+import json
+def setup_vs_code_config(install_folder:str):
+    Path(".vscode").mkdir(parents=True, exist_ok=True)
+
+    with Path(".vscode/settings.json").open("a+t") as config_file:
+        config_file.seek(0)
+        try:
+            current_config = json.load( config_file )
+        except json.JSONDecodeError as e:
+            logger.info("Creating new empty config for vscode. ")
+            current_config = {}
+        current_config["python.defaultInterpreterPath"] = str( Path( install_folder, "bin", "python.exe")) # Note that we are being windows exclusive here...
+        current_extra_paths = current_config.setdefault("python.analysis.extraPaths", []) 
+        for extra_path in read_packagefolder_file():
+            if extra_path in current_extra_paths: continue
+            current_extra_paths.insert(0, extra_path)
+        current_config["python.analysis.extraPaths"] = current_extra_paths
+        config_file.truncate(0)
+        json.dump( current_config, config_file, indent=4 )
 
 def designer():
     launch("TouchDesigner")
@@ -126,3 +168,12 @@ def editor():
 def player():
     environ["NODE_ENV"] = "production"
     launch("TouchPlayer")
+
+def setup_code():
+    setup_vs_code_config( 
+        str( 
+            search_touchdesigner_folder(
+                get_tool_config().get("enforce-version", "latest-build")
+                ) 
+            )
+    )
