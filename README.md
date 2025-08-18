@@ -13,7 +13,17 @@ To run the project use
 ```uv run player``` to launch TouchPlayer and set NODE_ENV to production
 
 To setup a good vscode settings, run ```uv run setup_code``` which will create links to all important libs defined in the .packagefolder and set the defaultInterpreter.
+setup_code requires a .packagefolder file. It will create an empty one, but this would be kinda wastefull.
+Simple baseone would look like this:
+```
+# Lines starting with # will be ignored as comments.
 
+# ${ gets converted in to ENV-Variable. }
+${UV_PROJECT_ENVIRONMENT}/Lib/site-packages
+
+project_packages
+.venv/Lib/site-packages
+```
 
 ## PyProject.toml 
 The touchlauncher package will use the .touchdesigner-version file to determin the correct TouchDesigner-Installation and path.
@@ -36,4 +46,5 @@ enforce-version="closest-build"
 ## ENV-Variables
 You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
 .env files will be mounted before TouchDesigner starts.
+
 
