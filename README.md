@@ -1,4 +1,7 @@
 A commandline utility that allows management of TouchDesigner from UV.
+
+Windows Only. (PR welcome)
+
 ## Install
 use ```uv add git+https://github.com/PlusPlusOneGmbH/Py_TD_Launch``` to add to project.
 
@@ -46,6 +49,7 @@ enforce-version="closest-build"
 ## ENV-Variables
 You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
 .env files will be mounted before TouchDesigner starts.
+
 
 
 
