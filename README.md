@@ -1,5 +1,8 @@
 A commandline utility that allows management of TouchDesigner from UV.
+## Install
+use ```uv add git+https://github.com/PlusPlusOneGmbH/Py_TD_Launch``` to add to project.
 
+## Commands
 It searches the best installed TouchDesigner version and allows for the following commands.
 To run the project use 
 
@@ -11,6 +14,8 @@ To run the project use
 
 To setup a good vscode settings, run ```uv run setup_code``` which will create links to all important libs defined in the .packagefolder and set the defaultInterpreter.
 
+
+## PyProject.toml 
 The touchlauncher package will use the .touchdesigner-version file to determin the correct TouchDesigner-Installation and path.
 The behavior can be defined via the pyproject.toml
 ```toml
@@ -27,3 +32,8 @@ enforce-version="closest-build"
 # latest-version : simply takes the latest available installed version. Def not suggestes! - Example: Will pick 2025.1000
 
 ```
+
+## ENV-Variables
+You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
+.env files will be mounted before TouchDesigner starts.
+
