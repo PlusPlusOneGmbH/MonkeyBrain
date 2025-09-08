@@ -162,11 +162,69 @@ def setup_vs_code_config(install_folder:str):
         config_file.truncate(0)
         json.dump( current_config, config_file, indent=4 )
 
+
+import urllib.request
+
+def setup_project_files(td_branch = "stable"):
+    if not (packagefolderfile:=Path(".packagefolder")).is_file():
+        packagefolderfile.touch()
+        packagefolderfile.write_text("""
+# Lines starting with # will be ignored as comments.
+
+# ${ gets converted in to ENV-Variable. }
+${UV_PROJECT_ENVIRONMENT}/Lib/site-packages
+
+project_packages
+.venv/Lib/site-packages
+                                     """.strip())
+        
+    if not (touchdesignerversionfle:=Path(".touchdesigner-version")).is_file():
+        touchdesignerversionfle.touch()
+        # Lets fetch the latest version from http://www.derivative.ca/099/Downloads/Files/history.txt
+        try:
+            link = "http://www.derivative.ca/099/Downloads/Files/history.txt"
+            response = urllib.request.urlopen(link)
+            responsetext = response.read().decode()
+            stable, experimental = responsetext.strip().split("\n")
+            versioninfo = experimental if td_branch == "experimental" else stable
+
+            touchdesignerversionfle.write_text( versioninfo.split("\t")[3] )
+
+        except Exception as e:
+            logger.info(f"Could not fetch data. Writing 2023.1200. {e}")
+            # If not, lets just write a version I know works. 
+            touchdesignerversionfle.write_text("2023.12000")
+
+
+# calls
+
+import argparse
+def entry():
+    parser = argparse.ArgumentParser(
+                    prog='Monkeybrain',
+                    description='Manage TD installations.',
+                    epilog='Makes setting projects up bearable..')
+    parser.add_argument('command', choices = ["init", "init.code", "init.files", "edit", "designer", "player"])
+    parsed_arguments = parser.parse_args()
+    match parsed_arguments.command:
+        case "init":
+            init()
+        case "init.code":
+            setup_code()
+        case "init.files":
+            setup_files()
+        case "edit":
+            editor()
+        case "designer":
+            designer()
+        case "player":
+            player()
+
 def designer():
+    environ["NODE_ENV"] = "production"
     launch("TouchDesigner")
 
 def editor():
-    environ["NODE_ENV"] = "production"
     launch("TouchDesigner")
 
 def player():
@@ -181,3 +239,10 @@ def setup_code():
                 ) 
             )
     )
+
+def setup_files():
+    setup_project_files()
+
+def init():
+    setup_files()
+    setup_code()
