@@ -9,13 +9,17 @@ use ```uv add git+https://github.com/PlusPlusOneGmbH/Py_TD_Launch``` to add to p
 It searches the best installed TouchDesigner version and allows for the following commands.
 To run the project use 
 
-```uv run edit``` to launch TouchDesigner
+```uv run mb edit``` to launch TouchDesigner
 
-```uv run designer``` to launch TouchDesigner and set NODE_ENV to production
+```uv run mb designer``` to launch TouchDesigner and set NODE_ENV to production
 
-```uv run player``` to launch TouchPlayer and set NODE_ENV to production
+```uv run mb player``` to launch TouchPlayer and set NODE_ENV to production
 
-To setup a good vscode settings, run ```uv run setup_code``` which will create links to all important libs defined in the .packagefolder and set the defaultInterpreter.
+To create the base of required files (.packagefolder and .touchdesigner-version) run ```uv run mb init.files```.
+
+To setup a good vscode settings, run ```uv run mb init.code``` which will create links to all important libs defined in the .packagefolder and set the defaultInterpreter.
+
+Both functions are combined in ```uv run mb init```` 
 
 Default .packagefolder file looks like this.
 ```
@@ -49,6 +53,7 @@ enforce-version="closest-build"
 ## ENV-Variables
 You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
 .env files will be mounted before TouchDesigner starts.
+
 
 
 
