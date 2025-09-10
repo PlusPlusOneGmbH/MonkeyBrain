@@ -204,6 +204,7 @@ def entry():
                     prog='Monkeybrain',
                     description='Manage TD installations.',
                     epilog='Makes setting projects up bearable..')
+    
     parser.add_argument('command', choices = ["init", "init.code", "init.files", "edit", "designer", "player"])
     parsed_arguments = parser.parse_args()
     match parsed_arguments.command:
