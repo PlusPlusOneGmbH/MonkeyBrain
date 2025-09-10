@@ -19,7 +19,7 @@ To create the base of required files (.packagefolder and .touchdesigner-version)
 
 To setup a good vscode settings, run ```uv run mb init.code``` which will create links to all important libs defined in the .packagefolder and set the defaultInterpreter.
 
-Both functions are combined in ```uv run mb init```` 
+Both functions are combined in ```uv run mb init```
 
 Default .packagefolder file looks like this.
 ```
@@ -53,6 +53,7 @@ enforce-version="closest-build"
 ## ENV-Variables
 You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
 .env files will be mounted before TouchDesigner starts.
+
 
 
 
