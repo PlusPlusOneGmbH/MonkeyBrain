@@ -1,7 +1,7 @@
 [project]
 name = "monkeybrain"
-version = "0.2.1"
-description = "An automated launcher for TouchDesigner Projects."
+version = "0.2.2"
+description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
 license="MIT"
 authors = [
@@ -16,8 +16,9 @@ dependencies = [
 enforce-version="latest-version"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/monkeybrain"]

@@ -1,3 +1,6 @@
+
+
+
 from typing import Literal, Union
 from enum import Enum
 from functools import cache
@@ -25,7 +28,7 @@ class SearchMode(Enum):
 def search_touchdesigner_folder(mode:SearchMode) -> Path:
     logger.info(f"Searching for TouchDesigner Installs in mode {mode}")
 
-    td_search_paths = [ "C:\\Program Files\\Derivative" ] + environ.get("TD_INSTALLSEARCHPATH", "").split(":")
+    td_search_paths = [ "C:\\Program Files\\Derivative" ] + [ pathstring.strip() for pathstring in environ.get("TD_INSTALLSEARCHPATH", "").split(";") ]
     td_version = Path(".touchdesigner-version").read_text()
     td_folder = []
     
