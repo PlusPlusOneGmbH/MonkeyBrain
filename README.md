@@ -51,8 +51,14 @@ enforce-version="closest-build"
 ```
 
 ## ENV-Variables
-You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a : delimited string. 
-.env files will be mounted before TouchDesigner starts.
+
+
+__.env files will be mounted before TouchDesigner starts.__
+
+You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a ; delimited string. 
+
+( i.E. TD_INSTALLSEARCHPATH = "D:/TouchDesigner; E:/TouchDsigner")
+
 
 
 
