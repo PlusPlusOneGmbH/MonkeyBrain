@@ -3,7 +3,7 @@ A commandline utility that allows management of TouchDesigner from UV.
 Windows Only. (PR welcome)
 
 ## Install
-use ```uv add git+https://github.com/PlusPlusOneGmbH/MonkeyBrain``` to add to project.
+use ```uv add git+https://github.com/PlusPlusOneGmbH/MonkeyBrain``` or ```uv add monkeybrain``` to add to project.
 
 ## Commands
 It searches the best installed TouchDesigner version and allows for the following commands.
@@ -58,6 +58,7 @@ __.env files will be mounted before TouchDesigner starts.__
 You can supply additional search paths by setting ```TD_INSTALLSEARCHPATH``` as a ; delimited string. 
 
 ( i.E. TD_INSTALLSEARCHPATH = "D:/TouchDesigner; E:/TouchDsigner")
+
 
 
 
