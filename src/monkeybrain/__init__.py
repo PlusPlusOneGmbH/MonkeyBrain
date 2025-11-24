@@ -127,8 +127,10 @@ def read_packagefolder_file():
     import os, re
     def replace_var(match):
         var_name = match.group(1)
-        
-        return os.environ[var_name] 
+        if len( env_naming := var_name.split("||") ) == 2:
+            return os.environ.get( env_naming[0], env_naming[1] )
+        else:
+            return os.environ[env_naming[0]]
         
     result = []
     with open(".packagefolder", "a+t") as package_folder_file:
