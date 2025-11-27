@@ -176,11 +176,9 @@ def setup_project_files(td_branch = "stable"):
         packagefolderfile.write_text("""
 # Lines starting with # will be ignored as comments.
 
-# ${ gets converted in to ENV-Variable. }
-${UV_PROJECT_ENVIRONMENT}/Lib/site-packages
-
+# ${ gets converted in to ENV-Variable. } use || to define a default value
+${UV_PROJECT_ENVIRONMENT||.venv}/Lib/site-packages
 project_packages
-.venv/Lib/site-packages
                                      """.strip())
         
     if not (touchdesignerversionfle:=Path(".touchdesigner-version")).is_file():

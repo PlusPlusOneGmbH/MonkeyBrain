@@ -1,6 +1,6 @@
 [project]
 name = "monkeybrain"
-version = "0.2.3"
+version = "0.2.4"
 description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
 license="MIT"
