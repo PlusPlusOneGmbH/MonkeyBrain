@@ -10,6 +10,7 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "python-dotenv>=1.1.1",
+    "pywin32>=311",
 ]
 keywords = ["TouchDesigner", "UV", "WindowsOnly"]
 
@@ -19,8 +20,20 @@ Website = "https://plusplus.one"
 Repository = "https://github.com/PlusPlusOneGmbH/Monkeybrain"
 
 
-[tool.touchdesigner]
-enforce-version="latest-version"
+[tool.monkeybrain]
+touchdesigner-version   = "2025.32050"
+enforce-version         = "latest-version"
+projectfile             = "Project.toe"
+
+[tool.touchdesigner.TDPyEnvManagerContext]
+mode    = "Python vEnv"
+envName = ".venv"
+installPath = "."
+extraPaths  = ["from/project/toml"]
+
+active          = true #can be omitted [?]
+pythonVersion   = "3.11" #can be omitted [?]
+autoSetup       = false #can be omitted [?]
 
 [build-system]
 requires = ["setuptools>=61.0"]
