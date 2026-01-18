@@ -3,45 +3,35 @@ name = "monkeybrain"
 version = "0.2.4"
 description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
-license="MIT"
-authors = [
-    { name = "Wieland Hilker", email = "Wieland@PlusPlus.One" }
-]
+license = "MIT"
 requires-python = ">=3.11"
-dependencies = [
-    "python-dotenv>=1.1.1",
-    "pywin32>=311",
-]
-keywords = ["TouchDesigner", "UV", "WindowsOnly"]
+dependencies = [ "python-dotenv>=1.1.1", "pywin32>=311", "toml>=0.10.2",]
+keywords = [ "TouchDesigner", "UV", "WindowsOnly",]
+[[project.authors]]
+name = "Wieland Hilker"
+email = "Wieland@PlusPlus.One"
 
+[build-system]
+requires = [ "setuptools>=61.0",]
+build-backend = "setuptools.build_meta"
 
 [project.urls]
 Website = "https://plusplus.one"
 Repository = "https://github.com/PlusPlusOneGmbH/Monkeybrain"
 
+[project.scripts]
+mb = "monkeybrain:entry"
 
 [tool.monkeybrain]
-touchdesigner-version   = "2025.32050"
-enforce-version         = "latest-version"
-projectfile             = "Project.toe"
+touchdesigner-version = "2025.32144"
+enfore-version = "strict"
+projectfile = "Project.toe"
 
 [tool.touchdesigner.TDPyEnvManagerContext]
-mode    = "Python vEnv"
+mode = "Python vEnv"
 envName = ".venv"
 installPath = "."
-extraPaths  = ["from/project/toml"]
-
-active          = true #can be omitted [?]
-pythonVersion   = "3.11" #can be omitted [?]
-autoSetup       = false #can be omitted [?]
-
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
+extraPaths = [ "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages",]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/monkeybrain"]
-
-[project.scripts]
-"mb"   = "monkeybrain:entry"
+packages = [ "src/monkeybrain",]

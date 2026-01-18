@@ -1,10 +1,16 @@
 
 from pathlib import Path
 from os import environ
+from typing import Literal
+
+
 import logging
 logger = logging.getLogger()
 log_level = getattr(logging, environ.get("TOUCHLAUNCH_LOGLEVEL", "INFO"), None) or logging.INFO
 logging.basicConfig(level=log_level)
+
+
+
 
 def read_packagefolder_file():
     import os, re
@@ -16,22 +22,22 @@ def read_packagefolder_file():
             return os.environ[env_naming[0]]
         
     result = []
-
-    with open(".packagefolder", "a+t") as package_folder_file:
-        package_folder_file.seek(0)
-        for _line in reversed( package_folder_file.readlines() ):
-            line = _line.strip()
-            if line.startswith("#"): continue # skip comments
-            try:
-                enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
-            except KeyError:
-                continue
-            if not enved_line: continue 
-            result.append(enved_line)
+    if Path( ".packagefolder" ).is_file():
+        with open(".packagefolder", "a+t") as package_folder_file:
+            package_folder_file.seek(0)
+            for _line in reversed( package_folder_file.readlines() ):
+                line = _line.strip()
+                if line.startswith("#"): continue # skip comments
+                try:
+                    enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
+                except KeyError:
+                    continue
+                if not enved_line: continue 
+                result.append(enved_line)
     return result
 
 import json
-from monkeybrain import TouchdesignerInstall
+from .search import TouchdesignerInstall
 from .project import get_tool_config
 
 def setup_vs_code_config(install_definition:TouchdesignerInstall):
@@ -55,10 +61,38 @@ def setup_vs_code_config(install_definition:TouchdesignerInstall):
         json.dump( current_config, config_file, indent=4 )
 
 
-import urllib.request
+def get_latest_td_version( td_branch:Literal["stable", "experimental"]):
+    try:
+        link = "http://www.derivative.ca/099/Downloads/Files/history.txt"
+        response = urllib.request.urlopen(link)
+        responsetext = response.read().decode()
+        stable, experimental = responsetext.strip().split("\n")
+        versioninfo = experimental if td_branch == "experimental" else stable
 
-def setup_project_files(td_branch = "stable"):
-    # We need to setup pyproject toml instead of this for future releases. Can stay for now!
+        return versioninfo.split("\t")[3]
+
+    except Exception as e:
+        logger.info(f"Could not fetch data. Writing 2025.32050. {e}")
+        # If not, lets just write a version I know works. 
+        return "2025.32050"
+
+from typing import Literal
+def setup_project_files( td_branch:Literal["stable", "experimental"] = "stable"):
+    td_version = sorted( list_touchdesigner_installs() or [{"string_value" : "", "numeric_value" : -1000}] , key = lambda value: value["numeric_value"], reverse=True )
+    target_td_version:str =  td_version[0]["string_value"] or get_latest_td_version(td_branch) # pyright: ignore[reportAssignmentType]
+    logger.info(f"setup projectfile with target TD_Version {target_td_version}")
+    if float( target_td_version ) > 2025.32050:
+        # This branch will only make sense once everything can live nicely inside the pyproject.toml. Sooon!
+        return setup_project_files_v2( target_td_version )
+    return setup_project_files_v1( target_td_version )
+
+
+import urllib.request
+def setup_project_files_v1( td_version:str ):
+    """
+    Generates a .packagefolder and .touchdesigner-version file. Yaih!
+    
+    """
     if not (packagefolderfile:=Path(".packagefolder")).is_file():
         packagefolderfile.touch()
         packagefolderfile.write_text("""
@@ -72,16 +106,35 @@ project_packages
     if not (touchdesignerversionfle:=Path(".touchdesigner-version")).is_file():
         touchdesignerversionfle.touch()
         # Lets fetch the latest version from http://www.derivative.ca/099/Downloads/Files/history.txt
-        try:
-            link = "http://www.derivative.ca/099/Downloads/Files/history.txt"
-            response = urllib.request.urlopen(link)
-            responsetext = response.read().decode()
-            stable, experimental = responsetext.strip().split("\n")
-            versioninfo = experimental if td_branch == "experimental" else stable
+        touchdesignerversionfle.write_text( td_version )
 
-            touchdesignerversionfle.write_text( versioninfo.split("\t")[3] )
 
-        except Exception as e:
-            logger.info(f"Could not fetch data. Writing 2023.1200. {e}")
-            # If not, lets just write a version I know works. 
-            touchdesignerversionfle.write_text("2023.12000")
+import toml
+from .search import list_touchdesigner_installs
+from os import listdir
+def setup_project_files_v2(td_version:str):
+    """
+    Generates a .packagefolder and .touchdesigner-version file. Yaih!
+    
+    """
+
+    pyproject = Path( "pyproject.toml" )
+    current_pyproject:dict = toml.loads( pyproject.read_text() )
+
+    monkeybrain_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("monkeybrain", {})
+    monkeybrain_settingsdict.setdefault("touchdesigner-version",  td_version )
+    monkeybrain_settingsdict.setdefault("enfore-version", "strict")
+    projectfile = "Project.toe"
+    for item in listdir("."):
+        if item.endswith(".toe"): projectfile = item
+    monkeybrain_settingsdict.setdefault("projectfile", projectfile )
+
+    env_manager_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("touchdesigner", {}).setdefault("TDPyEnvManagerContext", {})
+    env_manager_settingsdict["mode"] = "Python vEnv"
+    env_manager_settingsdict["envName"] = ".venv"
+    env_manager_settingsdict["installPath"] = "."
+    env_manager_settingsdict["extraPaths"] = [
+        "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages"
+    ]
+
+    pyproject.write_text( toml.dumps( current_pyproject ))
