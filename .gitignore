@@ -10,3 +10,4 @@ wheels/
 .venv
 .touchdesigner-version
 .vscode/settings.json
+TDPyEnvManagerContext.yaml

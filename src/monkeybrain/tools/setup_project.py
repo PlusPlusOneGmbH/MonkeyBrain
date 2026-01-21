@@ -123,7 +123,7 @@ def setup_project_files_v2(td_version:str):
 
     monkeybrain_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("monkeybrain", {})
     monkeybrain_settingsdict.setdefault("touchdesigner-version",  td_version )
-    monkeybrain_settingsdict.setdefault("enfore-version", "strict")
+    monkeybrain_settingsdict.setdefault("enforce-version", "strict")
     projectfile = "Project.toe"
     for item in listdir("."):
         if item.endswith(".toe"): projectfile = item

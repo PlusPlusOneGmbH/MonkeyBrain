@@ -68,8 +68,8 @@ def search_touchdesigner_folder(mode:SearchMode) -> TouchdesignerInstall:
         for element in td_installs:
             logger.debug(f"Checking required {target_td_version} against {element}")
             if target_td_version == element["string_value"]: return element
-            logger.error(f"Could not find path for {target_td_version} in strict mode. Install specific version or change mode.")
-            raise Exception(f"Could not find path for {target_td_version} in strict mode. Install specific version or change mode.")
+        logger.error(f"Could not find path for {target_td_version} in strict mode. Install specific version or change mode.")
+        raise Exception(f"Could not find path for {target_td_version} in strict mode. Install specific version or change mode.")
     
     _required_version, _reuquired_build = target_td_version.split(".")
     required_version = int(_required_version)

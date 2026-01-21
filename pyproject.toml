@@ -1,6 +1,6 @@
 [project]
 name = "monkeybrain"
-version = "0.2.4"
+version = "0.3.0"
 description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
 license = "MIT"
@@ -23,15 +23,16 @@ Repository = "https://github.com/PlusPlusOneGmbH/Monkeybrain"
 mb = "monkeybrain:entry"
 
 [tool.monkeybrain]
-touchdesigner-version = "2025.32144"
+touchdesigner-version = "2025.32260"
 enfore-version = "strict"
-projectfile = "Project.toe"
+projectfile = "Example.toe"
+enforce-version = "strict"
 
 [tool.touchdesigner.TDPyEnvManagerContext]
 mode = "Python vEnv"
 envName = ".venv"
 installPath = "."
-extraPaths = [ "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages",]
+extraPaths = [ "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages","vlarg"]
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/monkeybrain",]
