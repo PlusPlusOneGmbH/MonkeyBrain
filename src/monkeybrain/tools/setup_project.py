@@ -50,7 +50,7 @@ def setup_vs_code_config(install_definition:TouchdesignerInstall):
         except json.JSONDecodeError as e:
             logger.info("Creating new empty config for vscode. ")
             current_config = {}
-        current_config["python.defaultInterpreterPath"] = str( install_definition["executeable"] ) # Note that we are being windows exclusive here...
+        current_config["python.defaultInterpreterPath"] = str( Path( install_definition["executeable"].parent, "python.exe" ) ) # Note that we are being windows exclusive here...
         current_extra_paths = current_config.setdefault("python.analysis.extraPaths", []) 
 
         for extra_path in read_packagefolder_file() + get_tool_config().get("TDPyEnvManagerContext", {}).get("extraPaths", []):

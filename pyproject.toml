@@ -1,6 +1,6 @@
 [project]
 name = "monkeybrain"
-version = "0.3.0"
+version = "0.3.1"
 description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
 license = "MIT"
@@ -32,7 +32,7 @@ enforce-version = "strict"
 mode = "Python vEnv"
 envName = ".venv"
 installPath = "."
-extraPaths = [ "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages","vlarg"]
+extraPaths = [ "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages",]
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/monkeybrain",]
