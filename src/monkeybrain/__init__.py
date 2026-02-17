@@ -13,6 +13,10 @@ from pathlib import Path
 from .tools.project import get_tool_config, load_project_config
 from .tools.search import search_touchdesigner_folder
 
+from .tools.log import use_logger
+logger = use_logger()
+
+
 import logging
 logger = logging.getLogger()
 log_level = getattr(logging, environ.get("TOUCHLAUNCH_LOGLEVEL", "INFO"), None) or logging.INFO
@@ -51,19 +55,23 @@ def entry():
     
     parser.add_argument('command', choices = ["init", "init.code", "init.files", "edit", "designer", "player"])
     parsed_arguments = parser.parse_args()
-    match parsed_arguments.command:
-        case "init":
-            init()
-        case "init.code":
-            setup_code()
-        case "init.files":
-            setup_files()
-        case "edit":
-            editor()
-        case "designer":
-            designer()
-        case "player":
-            player()
+    try:
+        match parsed_arguments.command:
+            case "init":
+                init()
+            case "init.code":
+                setup_code()
+            case "init.files":
+                setup_files()
+            case "edit":
+                editor()
+            case "designer"                 :
+                designer()
+            case "player":
+                player()    
+    except Exception as e:
+        print("\n")
+        logger.critical( f"Failed to run {parsed_arguments.command} for the following reason:\n{e}" )
 
 def designer():
     environ["NODE_ENV"] = "production"

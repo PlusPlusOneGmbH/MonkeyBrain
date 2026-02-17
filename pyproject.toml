@@ -1,6 +1,6 @@
 [project]
 name = "monkeybrain"
-version = "0.3.1"
+version = "0.3.2"
 description = "A CLI-Tool for launching TouchDesigner projects."
 readme = "README.md"
 license = "MIT"
@@ -24,9 +24,8 @@ mb = "monkeybrain:entry"
 
 [tool.monkeybrain]
 touchdesigner-version = "2025.32260"
-enfore-version = "strict"
 projectfile = "Example.toe"
-enforce-version = "strict"
+enforce-version = "closest-build"
 
 [tool.touchdesigner.TDPyEnvManagerContext]
 mode = "Python vEnv"

@@ -4,10 +4,8 @@ from os import environ
 from typing import Literal
 
 
-import logging
-logger = logging.getLogger()
-log_level = getattr(logging, environ.get("TOUCHLAUNCH_LOGLEVEL", "INFO"), None) or logging.INFO
-logging.basicConfig(level=log_level)
+from .log import use_logger
+logger = use_logger()
 
 
 

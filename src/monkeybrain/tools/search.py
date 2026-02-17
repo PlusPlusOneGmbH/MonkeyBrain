@@ -2,10 +2,8 @@
 from pathlib import Path
 from os import environ, listdir
 
-import logging
-logger = logging.getLogger()
-log_level = getattr(logging, environ.get("TOUCHLAUNCH_LOGLEVEL", "INFO"), None) or logging.INFO
-logging.basicConfig(level=log_level)
+from .log import use_logger
+logger = use_logger()
 
 
 from enum import Enum
@@ -31,14 +29,28 @@ from .file_meta import get_file_metadata
 def list_touchdesigner_installs() -> List[TouchdesignerInstall]:
     td_search_paths = [ "C:\\Program Files\\Derivative" ] + [ pathstring.strip() for pathstring in environ.get("TD_INSTALLSEARCHPATH", "").split(";") ]
     td_installations:List[TouchdesignerInstall] = []
+
     for search_location in [Path(_search_location) for _search_location in td_search_paths]:
         if not search_location.is_dir(): continue
         for install_location in [ Path(search_location, _install_location) for _install_location in listdir( search_location )]:
             if not install_location.is_dir(): continue
             exeucteable = Path( install_location, "bin", "TouchDesigner.exe")
-            version_meta_data = get_file_metadata( exeucteable, ["Product version"]).get("Product version", "0.0.0.0")
-            if version_meta_data == "0.0.0.0": continue
-            _, __, version, build = version_meta_data.split(".")
+
+            executeable_version_string = get_file_metadata( exeucteable, ["Product version"]).get("Product version", "0.0.0.0")
+            if executeable_version_string == "0.0.0.0": continue
+            split_version_string = executeable_version_string.split(".")
+
+            if len( split_version_string ) != 4:
+                logger.warning(f"Expected version in format N.N.N.N, for {executeable_version_string}")
+                logger.info("Falling back to extracting version from foldername.")
+
+                split_version_string = search_location.name.split(".")
+                if len(split_version_string) != 3:
+                    logger.warning(f"Failes to extract version from installation. Skipping {install_location}")
+                    continue
+            
+            version, build = executeable_version_string.split(".")[-2:]
+
             td_installations.append({
                 "version" : int(version),
                 "build" : int( build ),
