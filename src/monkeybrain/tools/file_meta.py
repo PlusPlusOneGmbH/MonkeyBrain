@@ -376,7 +376,6 @@ def get_touchdesigner_file_version(filepath:Path) -> str:
         _name = namespace.GetDetailsOf(None, index)
         if _name is None: return ""
         _value =  namespace.GetDetailsOf(item, index)
-        print(f"{index} {_value}")
         if re.fullmatch( pattern, _value.replace("\\", "/"),):
             if int( _value.split(".")[1]) >= 99:
                 return _value  
