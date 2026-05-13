@@ -353,11 +353,40 @@ key_types = Literal[
     "Product version"
 ]
 
+import re
+
+def get_touchdesigner_file_version(filepath:Path) -> str:
+    """
+        This will only search the touchdesigner version, nothing else, which is fine, bt also inefficient...
+
+        THIS IS AN INCREDIBLE STUPID BANDAID AND SHOULD NOT BE REQUIRED FFS. WHY WINDOWS; WHY IS IT NOT POSSIBLE FOR ME TO GET THAT SHIT EASILY?
+    """
+
+    path        = str(filepath.parent.absolute())
+    filename    = str(filepath.name)
+
+    dispatch = client.gencache.EnsureDispatch('Shell.Application', 0)
+    namespace = dispatch.NameSpace(path)
+    if namespace is None: return ""
+    item = namespace.ParseName(str(filename))
+    
+    pattern = r"^\d+\.\d+\.\d+\.\d+$"
+
+    for index in range(600):
+        _name = namespace.GetDetailsOf(None, index)
+        if _name is None: return ""
+        _value =  namespace.GetDetailsOf(item, index)
+        print(f"{index} {_value}")
+        if re.fullmatch( pattern, _value.replace("\\", "/"),):
+            if int( _value.split(".")[1]) >= 99:
+                return _value  
+    return ""
+
 def get_file_metadata(filepath:Path, metadata:List[key_types]) -> Dict[str, str]:
     """
     https://stackoverflow.com/a/63662404
     """
-
+    raise NotImplemented("Faulty approach. Needs to be updated to actually work reliably.")
     path        = str(filepath.parent.absolute())
     filename    = str(filepath.name)
 
@@ -374,6 +403,10 @@ def get_file_metadata(filepath:Path, metadata:List[key_types]) -> Dict[str, str]
     file_metadata = dict()
     item = namespace.ParseName(str(filename))
     index_list = list( ( _lookup[index_name], index_name) for index_name in metadata )
+    
+    for index in range(600):
+        attr_value = namespace.GetDetailsOf(None, index)
+        print(f"{index} : {attr_value}")
 
     for ind, attribute in index_list:
         attr_value = namespace.GetDetailsOf(item, ind)

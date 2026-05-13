@@ -24,7 +24,7 @@ class TouchdesignerInstall(TypedDict):
     folder:Path
     executeable:Path
 
-from .file_meta import get_file_metadata
+from .file_meta import get_file_metadata, get_touchdesigner_file_version
 
 def list_touchdesigner_installs() -> List[TouchdesignerInstall]:
     td_search_paths = [ "C:\\Program Files\\Derivative" ] + [ pathstring.strip() for pathstring in environ.get("TD_INSTALLSEARCHPATH", "").split(";") ]
@@ -36,7 +36,8 @@ def list_touchdesigner_installs() -> List[TouchdesignerInstall]:
             if not install_location.is_dir(): continue
             exeucteable = Path( install_location, "bin", "TouchDesigner.exe")
 
-            executeable_version_string = get_file_metadata( exeucteable, ["Product version"]).get("Product version", "0.0.0.0")
+            #executeable_version_string = get_file_metadata( exeucteable, ["Product version"]).get("Product version", "0.0.0.0")
+            executeable_version_string = get_touchdesigner_file_version( exeucteable ) or "0.0.0.0"
             if executeable_version_string == "0.0.0.0": continue
             split_version_string = executeable_version_string.split(".")
 
