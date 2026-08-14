@@ -27,7 +27,7 @@ def read_packagefolder_file():
                 line = _line.strip()
                 if line.startswith("#"): continue # skip comments
                 try:
-                    enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # Repalce ENV-Variables.
+                    enved_line = re.sub(r"\$\{([^}]+)\}", replace_var, line) # pyright: ignore[reportArgumentType] # Repalce ENV-Variables.
                 except KeyError:
                     continue
                 if not enved_line: continue 
@@ -54,6 +54,12 @@ def setup_vs_code_config(install_definition:TouchdesignerInstall):
         for extra_path in read_packagefolder_file() + get_tool_config().get("TDPyEnvManagerContext", {}).get("extraPaths", []):
             if extra_path in current_extra_paths: continue
             current_extra_paths.insert(0, extra_path)
+
+
+        env_name = get_tool_config().get("TDPyEnvManagerContext", {}).get("envName", [])
+        current_extra_paths.append(
+            f"{env_name}/Lib/site-packages"
+        )
         current_config["python.analysis.extraPaths"] = current_extra_paths
         config_file.truncate(0)
         json.dump( current_config, config_file, indent=4 )
@@ -110,29 +116,49 @@ project_packages
 import toml
 from .search import list_touchdesigner_installs
 from os import listdir
+from pathlib import Path
+from shutil import copy
+
 def setup_project_files_v2(td_version:str):
     """
-    Generates a .packagefolder and .touchdesigner-version file. Yaih!
+    Setup all files required to work with monkeybrain for a fullfledged project.
     
     """
 
     pyproject = Path( "pyproject.toml" )
     current_pyproject:dict = toml.loads( pyproject.read_text() )
 
+    projectfile = f"{current_pyproject['project']['name']}.toe"
+
+
     monkeybrain_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("monkeybrain", {})
     monkeybrain_settingsdict.setdefault("touchdesigner-version",  td_version )
     monkeybrain_settingsdict.setdefault("enforce-version", "strict")
-    projectfile = "Project.toe"
-    for item in listdir("."):
-        if item.endswith(".toe"): projectfile = item
-    monkeybrain_settingsdict.setdefault("projectfile", projectfile )
+    
+    if not Path(monkeybrain_settingsdict.get("projectfile", "")).is_file():
+        # If the projectfile does not exist, we will overwrite it to an existing one or create one.
+        logger.warning(f"Did not find a valid .toe file in settings.")
+        for item in listdir("."):
+            # Search for a toefile
+            if item.endswith(".toe"): 
+                projectfile = item
+                logger.warning(f"Found existing .toe file, will use {item}.")
+                break
+        else:
+            # if no toefiles are found, create one from the template.
+            if not Path( projectfile ).is_file():
+                copy( Path(Path(__file__).parent,  "Template.toe"), projectfile )
+            logger.warning(f"Did not find a valid .toe in project, will generate empty from template.")
+
+        monkeybrain_settingsdict["projectfile"] = projectfile 
 
     env_manager_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("touchdesigner", {}).setdefault("TDPyEnvManagerContext", {})
+
     env_manager_settingsdict["mode"] = "Python vEnv"
     env_manager_settingsdict["envName"] = ".venv"
     env_manager_settingsdict["installPath"] = "."
     env_manager_settingsdict["extraPaths"] = [
-        "src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages"
+        "src"
     ]
 
     pyproject.write_text( toml.dumps( current_pyproject ))

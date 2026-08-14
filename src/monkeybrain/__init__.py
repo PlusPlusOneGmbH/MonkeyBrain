@@ -67,11 +67,11 @@ def entry():
     try:
         match parsed_arguments.command:
             case "init":
-                init()
+                return init()
             case "init.code":
-                setup_code()
+                return setup_code()
             case "init.files":
-                setup_files()
+                return setup_files()
             case "edit":
                 command = "TouchDesigner"
             case "designer"                 :
@@ -80,7 +80,7 @@ def entry():
             case "player":
                 environ["NODE_ENV"] = "production"
                 command = "TouchPlayer"
-        launch(
+        return launch(
             command, 
             parsed_arguments.file, 
             parsed_arguments.gpuformonitor

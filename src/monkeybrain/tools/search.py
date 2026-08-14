@@ -63,7 +63,9 @@ def list_touchdesigner_installs() -> List[TouchdesignerInstall]:
     return td_installations
 
 from .project import get_project_touchdesigner_version
+from functools import cache
 
+@cache
 def search_touchdesigner_folder(mode:SearchMode) -> TouchdesignerInstall:
     logger.info(f"Searching for TouchDesigner Installs in mode {mode}")
 

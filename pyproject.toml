@@ -24,7 +24,7 @@ mb = "monkeybrain:entry"
 
 [tool.monkeybrain]
 touchdesigner-version = "2025.32260"
-projectfile = "Example.toe"
+projectfile = "monkeybrain.toe"
 enforce-version = "closest-build"
 
 [tool.touchdesigner.TDPyEnvManagerContext]
@@ -38,6 +38,11 @@ pythonVersion = "3.11"
 autoSetup = false
 autoSetupReqs = []
 autoSetupSyncReqs = false
-extraPaths = ["src", "${UV_PROJECT_ENVIRONMENT}/Lib/site-packages", ".venv/Lib/site-packages"]
+extraPaths = ["src"]
+
+
 [tool.hatch.build.targets.wheel]
 packages = [ "src/monkeybrain",]
+artifacts = [ "*.py", "*.toe",]
+
+
