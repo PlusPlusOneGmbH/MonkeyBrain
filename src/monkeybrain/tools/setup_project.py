@@ -60,7 +60,8 @@ def setup_vs_code_config(install_definition:TouchdesignerInstall):
         current_extra_paths.append(
             f"{env_name}/Lib/site-packages"
         )
-        current_config["python.analysis.extraPaths"] = current_extra_paths
+        
+        current_config["python.analysis.extraPaths"] = list(set(current_extra_paths))
         config_file.truncate(0)
         json.dump( current_config, config_file, indent=4 )
 
@@ -81,49 +82,26 @@ def get_latest_td_version( td_branch:Literal["stable", "experimental"]):
         return "2025.32050"
 
 from typing import Literal
-def setup_project_files( td_branch:Literal["stable", "experimental"] = "stable"):
-    td_version = sorted( list_touchdesigner_installs() or [{"string_value" : "", "numeric_value" : -1000}] , key = lambda value: value["numeric_value"], reverse=True )
-    target_td_version:str =  td_version[0]["string_value"] or get_latest_td_version(td_branch) # pyright: ignore[reportAssignmentType]
-    logger.info(f"setup projectfile with target TD_Version {target_td_version}")
-    if float( target_td_version ) > 2025.32050:
-        # This branch will only make sense once everything can live nicely inside the pyproject.toml. Sooon!
-        return setup_project_files_v2( target_td_version )
-    return setup_project_files_v1( target_td_version )
 
 
-import urllib.request
-def setup_project_files_v1( td_version:str ):
-    """
-    Generates a .packagefolder and .touchdesigner-version file. Yaih!
-    
-    """
-    if not (packagefolderfile:=Path(".packagefolder")).is_file():
-        packagefolderfile.touch()
-        packagefolderfile.write_text("""
-# Lines starting with # will be ignored as comments.
-
-# ${ gets converted in to ENV-Variable. } use || to define a default value
-${UV_PROJECT_ENVIRONMENT||.venv}/Lib/site-packages
-project_packages
-                                     """.strip())
-        
-    if not (touchdesignerversionfle:=Path(".touchdesigner-version")).is_file():
-        touchdesignerversionfle.touch()
-        # Lets fetch the latest version from http://www.derivative.ca/099/Downloads/Files/history.txt
-        touchdesignerversionfle.write_text( td_version )
 
 
 import toml
-from .search import list_touchdesigner_installs
+from .search import search_touchdesigner_folder
 from os import listdir
 from pathlib import Path
 from shutil import copy
 
-def setup_project_files_v2(td_version:str):
+def setup_project_files():
     """
     Setup all files required to work with monkeybrain for a fullfledged project.
     
     """
+    
+
+    td_install = search_touchdesigner_folder(
+            get_tool_config().get("enforce-version", "latest-version")
+    ) 
 
     pyproject = Path( "pyproject.toml" )
     current_pyproject:dict = toml.loads( pyproject.read_text() )
@@ -132,7 +110,7 @@ def setup_project_files_v2(td_version:str):
 
 
     monkeybrain_settingsdict = current_pyproject.setdefault("tool", {}).setdefault("monkeybrain", {})
-    monkeybrain_settingsdict.setdefault("touchdesigner-version",  td_version )
+    monkeybrain_settingsdict.setdefault("touchdesigner-version",  td_install["string_value"] )
     monkeybrain_settingsdict.setdefault("enforce-version", "strict")
     
     if not Path(monkeybrain_settingsdict.get("projectfile", "")).is_file():
@@ -147,8 +125,9 @@ def setup_project_files_v2(td_version:str):
         else:
             # if no toefiles are found, create one from the template.
             if not Path( projectfile ).is_file():
-                copy( Path(Path(__file__).parent,  "Template.toe"), projectfile )
-            logger.warning(f"Did not find a valid .toe in project, will generate empty from template.")
+                template_source_path = Path(td_install["folder"], "Samples", "Setup", "Base", "NewProject.toe")
+                copy( template_source_path, projectfile )
+                logger.warning(f"Did not find a valid .toe in project, will generate empty from {template_source_path}")
 
         monkeybrain_settingsdict["projectfile"] = projectfile 
 
